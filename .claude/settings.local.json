@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm start)",
+      "Bash(mysql --version:*)",
+      "Bash(dir:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run migrate:*)",
+      "Bash(npm run migrate:undo:*)",
+      "Bash(mysql:*)",
+      "Bash(node add-qr-column.js:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd //c taskkill //PID 5316 //F)",
+      "Bash(cmd //c taskkill //PID 8812 //F)",
+      "Bash(cmd //c taskkill //PID 12588 //F)",
+      "Bash(curl:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

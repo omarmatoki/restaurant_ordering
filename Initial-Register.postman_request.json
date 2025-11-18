@@ -1,0 +1,75 @@
+{
+	"name": "Initial Register (First Admin)",
+	"event": [
+		{
+			"listen": "test",
+			"script": {
+				"exec": [
+					"if (pm.response.code === 201) {",
+					"    var jsonData = pm.response.json();",
+					"    pm.environment.set(\"admin_token\", jsonData.data.token);",
+					"    pm.environment.set(\"user_id\", jsonData.data.user.id);",
+					"    pm.environment.set(\"restaurant_id\", jsonData.data.user.restaurantId);",
+					"    console.log('✅ Admin created successfully!');",
+					"    console.log('Token saved:', jsonData.data.token);",
+					"}"
+				],
+				"type": "text/javascript"
+			}
+		}
+	],
+	"request": {
+		"method": "POST",
+		"header": [
+			{
+				"key": "Content-Type",
+				"value": "application/json",
+				"type": "text"
+			}
+		],
+		"body": {
+			"mode": "raw",
+			"raw": "{\n  \"username\": \"admin\",\n  \"email\": \"admin@myrestaurant.com\",\n  \"password\": \"admin123\",\n  \"restaurantName\": \"مطعمي\",\n  \"restaurantAddress\": \"شارع الملك فهد، الرياض\",\n  \"restaurantPhone\": \"+966501234567\"\n}",
+			"options": {
+				"raw": {
+					"language": "json"
+				}
+			}
+		},
+		"url": {
+			"raw": "{{base_url}}/api/auth/register/initial",
+			"host": ["{{base_url}}"],
+			"path": ["api", "auth", "register", "initial"]
+		},
+		"description": "تسجيل أول مسؤول في النظام\n\n**ملاحظات:**\n- ❌ لا يحتاج Token\n- ✅ يعمل فقط إذا لم يكن هناك Admin\n- ✅ ينشئ مطعم + Admin تلقائياً\n- ✅ يُرجع Token مباشرة\n\n**بعد إنشاء أول Admin:**\n- هذا الـ endpoint يتوقف عن العمل\n- استخدم `/api/auth/register` بدلاً منه (مع Admin Token)"
+	},
+	"response": [
+		{
+			"name": "Success Example",
+			"originalRequest": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"admin\",\n  \"email\": \"admin@myrestaurant.com\",\n  \"password\": \"admin123\",\n  \"restaurantName\": \"مطعمي\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/auth/register/initial",
+					"host": ["{{base_url}}"],
+					"path": ["api", "auth", "register", "initial"]
+				}
+			},
+			"status": "Created",
+			"code": 201,
+			"_postman_previewlanguage": "json",
+			"header": [],
+			"cookie": [],
+			"body": "{\n    \"success\": true,\n    \"message\": \"تم إنشاء حساب المسؤول الأول بنجاح! يمكنك الآن تسجيل الدخول\",\n    \"data\": {\n        \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"user\": {\n            \"id\": 1,\n            \"username\": \"admin\",\n            \"email\": \"admin@myrestaurant.com\",\n            \"role\": \"admin\",\n            \"restaurantId\": 1\n        }\n    }\n}"
+		}
+	]
+}

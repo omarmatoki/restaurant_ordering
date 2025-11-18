@@ -1,0 +1,1399 @@
+{
+	"info": {
+		"_postman_id": "restaurant-ordering-system-2024",
+		"name": "Restaurant Ordering System API",
+		"description": "مجموعة شاملة لجميع endpoints نظام طلبات المطاعم\n\nبيانات تسجيل الدخول:\n- Admin: admin@restaurant.com / admin123\n- Kitchen: kitchen@restaurant.com / admin123",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"admin_token\", jsonData.token);",
+									"    pm.environment.set(\"user_id\", jsonData.user.id);",
+									"    pm.environment.set(\"restaurant_id\", jsonData.user.restaurantId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@restaurant.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "تسجيل دخول المسؤول"
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Kitchen)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"kitchen_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"kitchen@restaurant.com\",\n  \"password\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "تسجيل دخول المطبخ"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "me"]
+						},
+						"description": "جلب معلومات المستخدم الحالي"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"oldPassword\": \"admin123\",\n  \"newPassword\": \"newPassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/change-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "change-password"]
+						},
+						"description": "تغيير كلمة المرور"
+					},
+					"response": []
+				},
+				{
+					"name": "Register New User (Admin Only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"newkitchen\",\n  \"email\": \"newkitchen@restaurant.com\",\n  \"password\": \"kitchen123\",\n  \"role\": \"kitchen\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "تسجيل مستخدم جديد (Admin فقط)"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						},
+						"description": "تسجيل الخروج"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints خاصة بالمصادقة وتسجيل الدخول"
+		},
+		{
+			"name": "🍽️ Menu (Public)",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/menu/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "categories"]
+						},
+						"description": "جلب جميع أقسام القائمة (Public)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Items By Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/menu/categories/1/items",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "categories", "1", "items"]
+						},
+						"description": "جلب أصناف قسم معين"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/menu/items",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "items"]
+						},
+						"description": "جلب جميع الأصناف (Public)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Item",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/menu/items/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "items", "1"]
+						},
+						"description": "جلب تفاصيل صنف واحد"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints عامة للقائمة (بدون مصادقة)"
+		},
+		{
+			"name": "📋 Menu Management (Admin)",
+			"item": [
+				{
+					"name": "Create Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Seafood\",\n  \"nameAr\": \"المأكولات البحرية\",\n  \"description\": \"أطباق السمك والمأكولات البحرية\",\n  \"displayOrder\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/menu/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "categories"]
+						},
+						"description": "إنشاء قسم جديد (Admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Starters\",\n  \"nameAr\": \"المقبلات\",\n  \"description\": \"مقبلات شهية ومتنوعة\",\n  \"displayOrder\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/menu/categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "categories", "1"]
+						},
+						"description": "تعديل قسم (Admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/menu/categories/5",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "categories", "5"]
+						},
+						"description": "حذف قسم (Admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": 2,\n  \"name\": \"Mansaf\",\n  \"nameAr\": \"منسف\",\n  \"description\": \"منسف أردني تقليدي\",\n  \"price\": 70.00,\n  \"image\": \"https://via.placeholder.com/300\",\n  \"preparationTime\": 40,\n  \"displayOrder\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/menu/items",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "items"]
+						},
+						"description": "إضافة صنف جديد (Admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Grilled Chicken with Rice\",\n  \"nameAr\": \"دجاج مشوي مع الأرز\",\n  \"description\": \"دجاج مشوي على الفحم مع أرز بسمتي\",\n  \"price\": 50.00,\n  \"preparationTime\": 30\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/menu/items/3",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "items", "3"]
+						},
+						"description": "تعديل صنف (Admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/menu/items/11",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "items", "11"]
+						},
+						"description": "حذف صنف (Admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Item Availability",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isAvailable\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/menu/items/4/availability",
+							"host": ["{{base_url}}"],
+							"path": ["api", "menu", "items", "4", "availability"]
+						},
+						"description": "تفعيل/تعطيل توفر صنف (Admin & Kitchen)"
+					},
+					"response": []
+				}
+			],
+			"description": "إدارة القائمة (Admin فقط)"
+		},
+		{
+			"name": "🪑 Sessions (Customer)",
+			"item": [
+				{
+					"name": "Start Session (Scan QR)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"session_id\", jsonData.session.id);",
+									"    pm.environment.set(\"table_id\", jsonData.session.tableId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"numberOfGuests\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sessions/start/QR-1-T1-{{$randomAlphaNumeric}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "start", "QR-1-T1-{{$randomAlphaNumeric}}"]
+						},
+						"description": "بدء جلسة جديدة عند مسح QR Code"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/{{session_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "{{session_id}}"]
+						},
+						"description": "جلب تفاصيل جلسة معينة"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints الجلسات للزبائن"
+		},
+		{
+			"name": "🛎️ Sessions Management",
+			"item": [
+				{
+					"name": "Get Active Session By Table",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/table/{{table_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "table", "{{table_id}}"]
+						},
+						"description": "جلب الجلسة النشطة لطاولة معينة"
+					},
+					"response": []
+				},
+				{
+					"name": "Close Session",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"الزبون غادر - دفع كاش\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sessions/{{session_id}}/close",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "{{session_id}}", "close"]
+						},
+						"description": "إغلاق جلسة (Kitchen/Admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Sessions (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions?status=active&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions"],
+							"query": [
+								{
+									"key": "status",
+									"value": "active"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "جلب جميع الجلسات مع فلاتر (Admin)"
+					},
+					"response": []
+				}
+			],
+			"description": "إدارة الجلسات (Kitchen/Admin)"
+		},
+		{
+			"name": "📦 Orders (Customer)",
+			"item": [
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"order_id\", jsonData.order.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": {{session_id}},\n  \"items\": [\n    {\n      \"itemId\": 3,\n      \"quantity\": 2,\n      \"notes\": \"بدون فلفل من فضلك\"\n    },\n    {\n      \"itemId\": 7,\n      \"quantity\": 3\n    },\n    {\n      \"itemId\": 1,\n      \"quantity\": 1\n    }\n  ],\n  \"notes\": \"عجّل من فضلك - نحن في عجلة\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders"]
+						},
+						"description": "إنشاء طلب جديد (الزبون يطلب)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders By Session",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/session/{{session_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "session", "{{session_id}}"]
+						},
+						"description": "جلب جميع طلبات جلسة معينة"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "{{order_id}}"]
+						},
+						"description": "جلب تفاصيل طلب واحد"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints الطلبات للزبائن"
+		},
+		{
+			"name": "📋 Orders Management",
+			"item": [
+				{
+					"name": "Get Active Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/active/list",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "active", "list"]
+						},
+						"description": "جلب الطلبات النشطة (new + preparing)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders?status=new&limit=50",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders"],
+							"query": [
+								{
+									"key": "status",
+									"value": "new"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						},
+						"description": "جلب جميع الطلبات مع فلاتر"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"preparing\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "{{order_id}}", "status"]
+						},
+						"description": "تحديث حالة طلب (new -> preparing -> delivered)"
+					},
+					"response": []
+				}
+			],
+			"description": "إدارة الطلبات (Kitchen/Admin)"
+		},
+		{
+			"name": "👨‍🍳 Kitchen Dashboard",
+			"item": [
+				{
+					"name": "Get Kitchen Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kitchen/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kitchen", "dashboard"]
+						},
+						"description": "لوحة تحكم المطبخ - إحصائيات"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kitchen/orders/pending",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kitchen", "orders", "pending"]
+						},
+						"description": "الطلبات الجديدة (new)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Preparing Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kitchen/orders/preparing",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kitchen", "orders", "preparing"]
+						},
+						"description": "الطلبات قيد التحضير"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status (Kitchen)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"delivered\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kitchen/orders/{{order_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kitchen", "orders", "{{order_id}}", "status"]
+						},
+						"description": "تحديث حالة طلب من المطبخ"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Sessions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kitchen/sessions/active",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kitchen", "sessions", "active"]
+						},
+						"description": "الجلسات النشطة"
+					},
+					"response": []
+				},
+				{
+					"name": "Close Session (Kitchen)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"تم الدفع نقداً\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kitchen/sessions/{{session_id}}/close",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kitchen", "sessions", "{{session_id}}", "close"]
+						},
+						"description": "إغلاق جلسة من المطبخ"
+					},
+					"response": []
+				}
+			],
+			"description": "واجهة المطبخ الكاملة"
+		},
+		{
+			"name": "👨‍💼 Admin Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "dashboard"]
+						},
+						"description": "لوحة تحكم الإدارة - إحصائيات شاملة"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sales Report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/reports/sales?period=monthly&startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "reports", "sales"],
+							"query": [
+								{
+									"key": "period",
+									"value": "monthly",
+									"description": "daily, weekly, monthly"
+								},
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								}
+							]
+						},
+						"description": "تقرير المبيعات (يومي/أسبوعي/شهري)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Popular Items",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/reports/popular-items?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "reports", "popular-items"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "الأصناف الأكثر طلباً"
+					},
+					"response": []
+				}
+			],
+			"description": "لوحة تحكم الإدارة والتقارير"
+		},
+		{
+			"name": "🪑 Table Management (Admin)",
+			"item": [
+				{
+					"name": "Get All Tables",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/tables",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "tables"]
+						},
+						"description": "جلب جميع الطاولات"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Table",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tableNumber\": \"T6\",\n  \"capacity\": 6,\n  \"location\": \"الطابق الثالث - الشرفة\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/tables",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "tables"]
+						},
+						"description": "إنشاء طاولة جديدة (QR يُنشأ تلقائياً)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Table",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tableNumber\": \"T1-Updated\",\n  \"capacity\": 6,\n  \"location\": \"الطابق الأول - قرب المدخل\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/tables/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "tables", "1"]
+						},
+						"description": "تعديل طاولة"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Table",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/tables/6",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "tables", "6"]
+						},
+						"description": "حذف طاولة"
+					},
+					"response": []
+				}
+			],
+			"description": "إدارة الطاولات (Admin)"
+		},
+		{
+			"name": "👥 User Management (Admin)",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "users"]
+						},
+						"description": "جلب جميع المستخدمين"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"kitchen2\",\n  \"email\": \"kitchen2@restaurant.com\",\n  \"password\": \"kitchen123\",\n  \"role\": \"kitchen\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "users"]
+						},
+						"description": "إنشاء مستخدم جديد"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"kitchen_updated\",\n  \"email\": \"kitchen_new@restaurant.com\",\n  \"role\": \"kitchen\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/2",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "users", "2"]
+						},
+						"description": "تعديل مستخدم"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/3",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "users", "3"]
+						},
+						"description": "حذف مستخدم"
+					},
+					"response": []
+				}
+			],
+			"description": "إدارة المستخدمين (Admin)"
+		},
+		{
+			"name": "🏠 Server Info",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						},
+						"description": "فحص حالة السيرفر"
+					},
+					"response": []
+				}
+			],
+			"description": "معلومات السيرفر الأساسية"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "kitchen_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "session_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "table_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "restaurant_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
