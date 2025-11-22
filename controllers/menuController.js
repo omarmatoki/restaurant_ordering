@@ -81,9 +81,7 @@ exports.getAllItems = async (req, res) => {
   try {
     const { restaurantId, search } = req.query;
 
-    const whereClause = {
-      isAvailable: true
-    };
+    const whereClause = {};
 
     if (search) {
       whereClause[Op.or] = [
@@ -289,7 +287,7 @@ exports.deleteCategory = async (req, res) => {
 // @access  Admin
 exports.createItem = async (req, res) => {
   try {
-    const { categoryId, name, nameAr, description, price, image, preparationTime, displayOrder } = req.body;
+    const { categoryId, name, nameAr, description, price, preparationTime, displayOrder } = req.body;
 
     if (!categoryId || !name || !price) {
       return res.status(400).json({
@@ -314,13 +312,19 @@ exports.createItem = async (req, res) => {
       });
     }
 
+    // Handle uploaded images
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      images = req.files.map(file => `/uploads/items/${file.filename}`);
+    }
+
     const item = await Item.create({
       categoryId,
       name,
       nameAr,
       description,
       price,
-      image,
+      images,
       preparationTime,
       displayOrder: displayOrder || 0
     });
@@ -370,6 +374,19 @@ exports.updateItem = async (req, res) => {
       });
     }
 
+    // Handle uploaded images
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map(file => `/uploads/items/${file.filename}`);
+      // Append new images to existing ones or replace based on request
+      if (updateData.replaceImages === 'true') {
+        updateData.images = newImages;
+      } else {
+        // Append to existing images
+        const existingImages = item.images || [];
+        updateData.images = [...existingImages, ...newImages];
+      }
+    }
+
     await item.update(updateData);
 
     res.status(200).json({
@@ -387,12 +404,15 @@ exports.updateItem = async (req, res) => {
   }
 };
 
-// @desc    Delete item (soft delete)
+// @desc    Delete item (hard delete)
 // @route   DELETE /api/menu/items/:id
 // @access  Admin
 exports.deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
+
+    console.log(`Attempting to delete item with ID: ${id}`);
+    console.log('User:', req.user);
 
     const item = await Item.findByPk(id, {
       include: [{
@@ -402,22 +422,28 @@ exports.deleteItem = async (req, res) => {
     });
 
     if (!item) {
+      console.log('Item not found');
       return res.status(404).json({
         success: false,
         message: 'الصنف غير موجود'
       });
     }
 
+    console.log('Item found:', item.toJSON());
+
     // Check ownership
     if (item.category.restaurantId !== req.user.restaurantId) {
+      console.log('Ownership check failed');
       return res.status(403).json({
         success: false,
         message: 'ليس لديك صلاحية لحذف هذا الصنف'
       });
     }
 
-    // Soft delete by marking as unavailable
-    await item.update({ isAvailable: false });
+    // Hard delete - permanently remove from database
+    await item.destroy();
+
+    console.log(`Item ${id} deleted successfully`);
 
     res.status(200).json({
       success: true,

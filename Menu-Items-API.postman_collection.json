@@ -1,0 +1,665 @@
+{
+  "info": {
+    "name": "Menu Items API - Image Upload",
+    "_postman_id": "menu-items-images-api",
+    "description": "Complete API collection for managing menu items with multiple image uploads",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2.0.0"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "    console.log(\"Token saved:\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@restaurant.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login as admin to get JWT token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/menu/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "categories"]
+            },
+            "description": "Get all active categories"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Items - Create",
+      "item": [
+        {
+          "name": "Create Item with 3 Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "description": "ID of the category (required)",
+                  "type": "text"
+                },
+                {
+                  "key": "name",
+                  "value": "Pizza Margherita",
+                  "description": "Item name in English (required)",
+                  "type": "text"
+                },
+                {
+                  "key": "nameAr",
+                  "value": "بيتزا مارغريتا",
+                  "description": "Item name in Arabic (optional)",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Classic Italian pizza with tomato sauce, fresh mozzarella, basil, and olive oil",
+                  "description": "Item description (optional)",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "45.50",
+                  "description": "Item price (required)",
+                  "type": "text"
+                },
+                {
+                  "key": "preparationTime",
+                  "value": "20",
+                  "description": "Preparation time in minutes (optional)",
+                  "type": "text"
+                },
+                {
+                  "key": "displayOrder",
+                  "value": "1",
+                  "description": "Display order (optional, default: 0)",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "description": "Image file 1 (max 5 images, max 5MB each)",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images",
+                  "description": "Image file 2",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images",
+                  "description": "Image file 3",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items"]
+            },
+            "description": "Create a new menu item with multiple images"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/menu/items",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "menu", "items"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"تم إنشاء الصنف بنجاح\",\n  \"data\": {\n    \"id\": 15,\n    \"categoryId\": 1,\n    \"name\": \"Pizza Margherita\",\n    \"nameAr\": \"بيتزا مارغريتا\",\n    \"description\": \"Classic Italian pizza with tomato sauce, fresh mozzarella, basil, and olive oil\",\n    \"price\": \"45.50\",\n    \"images\": [\n      \"/uploads/items/pizza-1732039846123-123456789.jpg\",\n      \"/uploads/items/pizza-1732039846124-987654321.jpg\",\n      \"/uploads/items/pizza-1732039846125-456789123.jpg\"\n    ],\n    \"isAvailable\": true,\n    \"preparationTime\": 20,\n    \"displayOrder\": 1,\n    \"createdAt\": \"2024-11-19T18:44:06.000Z\",\n    \"updatedAt\": \"2024-11-19T18:44:06.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Burger with Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "categoryId",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "name",
+                  "value": "Classic Beef Burger",
+                  "type": "text"
+                },
+                {
+                  "key": "nameAr",
+                  "value": "برجر لحم كلاسيك",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Juicy beef burger with lettuce, tomato, cheese, and special sauce",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "35.00",
+                  "type": "text"
+                },
+                {
+                  "key": "preparationTime",
+                  "value": "15",
+                  "type": "text"
+                },
+                {
+                  "key": "displayOrder",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Pasta without Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "name",
+                  "value": "Spaghetti Carbonara",
+                  "type": "text"
+                },
+                {
+                  "key": "nameAr",
+                  "value": "سباغيتي كاربونارا",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Traditional Italian pasta with bacon, eggs, and parmesan cheese",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "38.00",
+                  "type": "text"
+                },
+                {
+                  "key": "preparationTime",
+                  "value": "18",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items"]
+            },
+            "description": "Create item without images (images are optional)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Items - Read",
+      "item": [
+        {
+          "name": "Get All Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/menu/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items"]
+            },
+            "description": "Get all menu items (both available and unavailable)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/menu/items",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "menu", "items"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"count\": 2,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"categoryId\": 1,\n      \"name\": \"Pizza Margherita\",\n      \"nameAr\": \"بيتزا مارغريتا\",\n      \"description\": \"Classic Italian pizza\",\n      \"price\": \"45.50\",\n      \"images\": [\n        \"/uploads/items/pizza-1732039846123-123456789.jpg\",\n        \"/uploads/items/pizza-1732039846124-987654321.jpg\"\n      ],\n      \"isAvailable\": true,\n      \"preparationTime\": 20,\n      \"displayOrder\": 1,\n      \"createdAt\": \"2024-11-19T18:44:06.000Z\",\n      \"updatedAt\": \"2024-11-19T18:44:06.000Z\",\n      \"category\": {\n        \"id\": 1,\n        \"name\": \"Italian Food\",\n        \"nameAr\": \"الطعام الإيطالي\"\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Single Item",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/menu/items/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items", "1"]
+            },
+            "description": "Get details of a specific item by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/menu/items?search=pizza",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "pizza"
+                }
+              ]
+            },
+            "description": "Search items by name, nameAr, or description"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Items by Restaurant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/menu/items?restaurantId=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items"],
+              "query": [
+                {
+                  "key": "restaurantId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get items filtered by restaurant ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Items by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/menu/categories/1/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "categories", "1", "items"]
+            },
+            "description": "Get all items in a specific category"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Items - Update",
+      "item": [
+        {
+          "name": "Update Item - Add New Images",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Pizza Margherita Deluxe",
+                  "description": "Update name (optional)",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "55.00",
+                  "description": "Update price (optional)",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Premium Italian pizza with the finest ingredients",
+                  "description": "Update description (optional)",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "description": "New image 1 (will be added to existing images)",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images",
+                  "description": "New image 2",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu/items/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items", "1"]
+            },
+            "description": "Update item and add new images to existing ones"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Item - Replace All Images",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "replaceImages",
+                  "value": "true",
+                  "description": "Set to 'true' to replace all existing images",
+                  "type": "text"
+                },
+                {
+                  "key": "name",
+                  "value": "Pizza Margherita Special Edition",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "60.00",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "description": "Replacement image 1",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images",
+                  "description": "Replacement image 2",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images",
+                  "description": "Replacement image 3",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu/items/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items", "1"]
+            },
+            "description": "Update item and replace all existing images with new ones"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Item - Text Only (No Images)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Pizza Margherita Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "nameAr",
+                  "value": "بيتزا مارغريتا محدثة",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "48.00",
+                  "type": "text"
+                },
+                {
+                  "key": "preparationTime",
+                  "value": "22",
+                  "type": "text"
+                },
+                {
+                  "key": "isAvailable",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu/items/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items", "1"]
+            },
+            "description": "Update item information without changing images"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Item Availability",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isAvailable\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu/items/1/availability",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items", "1", "availability"]
+            },
+            "description": "Toggle item availability (enable/disable)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Items - Delete",
+      "item": [
+        {
+          "name": "Delete Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/menu/items/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu", "items", "1"]
+            },
+            "description": "Permanently delete an item (hard delete)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/menu/items/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "menu", "items", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"تم حذف الصنف بنجاح\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "default"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const menuController = require('../controllers/menuController');
 const { authenticate, authorize } = require('../middleware/auth');
+const { uploadMultiple, handleUploadError } = require('../middleware/upload');
 
 // ==================== PUBLIC ROUTES (للزبائن) ====================
 
@@ -21,8 +22,8 @@ router.put('/categories/:id', authenticate, authorize('admin'), menuController.u
 router.delete('/categories/:id', authenticate, authorize('admin'), menuController.deleteCategory);
 
 // Items Management
-router.post('/items', authenticate, authorize('admin'), menuController.createItem);
-router.put('/items/:id', authenticate, authorize('admin'), menuController.updateItem);
+router.post('/items', authenticate, authorize('admin'), uploadMultiple, handleUploadError, menuController.createItem);
+router.put('/items/:id', authenticate, authorize('admin'), uploadMultiple, handleUploadError, menuController.updateItem);
 router.delete('/items/:id', authenticate, authorize('admin'), menuController.deleteItem);
 
 // Toggle Availability (Admin & Kitchen)

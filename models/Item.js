@@ -34,9 +34,11 @@ module.exports = (sequelize) => {
         min: 0
       }
     },
-    image: {
-      type: DataTypes.STRING(255),
-      allowNull: true
+    images: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+      comment: 'Array of image URLs'
     },
     isAvailable: {
       type: DataTypes.BOOLEAN,

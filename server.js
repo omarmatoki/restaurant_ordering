@@ -22,8 +22,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (QR code images)
+// Serve static files (QR code images and uploads)
 app.use('/qr-codes', express.static('public/qr-codes'));
+app.use('/uploads', express.static('uploads'));
 
 // Request logging middleware (development only)
 if (process.env.NODE_ENV === 'development') {

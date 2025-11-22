@@ -37,7 +37,7 @@ exports.startSession = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['name', 'nameAr', 'image']
+            attributes: ['name', 'nameAr', 'images']
           }]
         }]
       }]
@@ -118,7 +118,7 @@ exports.getSession = async (req, res) => {
             include: [{
               model: Item,
               as: 'item',
-              attributes: ['id', 'name', 'nameAr', 'image']
+              attributes: ['id', 'name', 'nameAr', 'images']
             }]
           }],
           order: [['orderTime', 'DESC']]
@@ -224,7 +224,7 @@ exports.closeSession = async (req, res) => {
             include: [{
               model: Item,
               as: 'item',
-              attributes: ['name', 'nameAr', 'image']
+              attributes: ['name', 'nameAr', 'images']
             }]
           }]
         }
@@ -288,7 +288,7 @@ exports.closeSession = async (req, res) => {
             include: [{
               model: Item,
               as: 'item',
-              attributes: ['name', 'nameAr', 'image']
+              attributes: ['name', 'nameAr', 'images']
             }]
           }]
         },

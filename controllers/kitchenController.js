@@ -30,7 +30,7 @@ exports.getPendingOrders = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'image', 'preparationTime']
+            attributes: ['id', 'name', 'nameAr', 'images', 'preparationTime']
           }]
         }
       ],
@@ -89,7 +89,7 @@ exports.getPreparingOrders = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'image', 'preparationTime']
+            attributes: ['id', 'name', 'nameAr', 'images', 'preparationTime']
           }]
         }
       ],
@@ -253,7 +253,7 @@ exports.updateOrderStatus = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'image']
+            attributes: ['id', 'name', 'nameAr', 'images']
           }]
         }
       ]

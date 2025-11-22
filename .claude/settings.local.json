@@ -15,7 +15,12 @@
       "Bash(cmd //c taskkill //PID 5316 //F)",
       "Bash(cmd //c taskkill //PID 8812 //F)",
       "Bash(cmd //c taskkill //PID 12588 //F)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(nul)",
+      "Bash(npm install:*)",
+      "Bash(npx sequelize-cli:*)",
+      "Bash(node update-items-table.js:*)",
+      "Bash(node test-orders-query.js:*)"
     ],
     "deny": [],
     "ask": []

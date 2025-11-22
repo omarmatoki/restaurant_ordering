@@ -132,7 +132,7 @@ exports.createOrder = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'image']
+            attributes: ['id', 'name', 'nameAr', 'images']
           }]
         }
       ]
@@ -170,7 +170,7 @@ exports.getOrdersBySession = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'image', 'price']
+            attributes: ['id', 'name', 'nameAr', 'images', 'price']
           }]
         }
       ],
@@ -273,14 +273,14 @@ exports.getAllOrders = async (req, res) => {
 
     const offset = (page - 1) * limit;
 
-    const { count, rows: orders } = await Order.findAndCountAll({
+    const { count, rows: orders} = await Order.findAndCountAll({
       where: whereClause,
       include: [
         {
           model: Session,
           as: 'session',
-          where: { restaurantId },
-          attributes: ['id', 'sessionNumber', 'status']
+          required: false,
+          attributes: ['id', 'sessionNumber', 'status', 'restaurantId']
         },
         {
           model: Table,
@@ -293,7 +293,7 @@ exports.getAllOrders = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'image']
+            attributes: ['id', 'name', 'nameAr', 'images']
           }]
         }
       ],
@@ -350,7 +350,7 @@ exports.getActiveOrders = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'image', 'preparationTime']
+            attributes: ['id', 'name', 'nameAr', 'images', 'preparationTime']
           }]
         }
       ],

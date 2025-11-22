@@ -221,7 +221,7 @@ exports.getPopularItems = async (req, res) => {
         {
           model: Item,
           as: 'item',
-          attributes: ['id', 'name', 'nameAr', 'price', 'image'],
+          attributes: ['id', 'name', 'nameAr', 'price', 'images'],
           include: [{
             model: Category,
             as: 'category',
@@ -376,24 +376,31 @@ exports.updateTable = async (req, res) => {
   }
 };
 
-// @desc    Delete table (soft delete)
+// @desc    Delete table (hard delete)
 // @route   DELETE /api/admin/tables/:id
 // @access  Admin
 exports.deleteTable = async (req, res) => {
   try {
     const { id } = req.params;
 
+    console.log(`Attempting to delete table with ID: ${id}`);
+    console.log('User:', req.user);
+
     const table = await Table.findByPk(id);
 
     if (!table) {
+      console.log('Table not found');
       return res.status(404).json({
         success: false,
         message: 'الطاولة غير موجودة'
       });
     }
 
+    console.log('Table found:', table.toJSON());
+
     // Check ownership
     if (table.restaurantId !== req.user.restaurantId) {
+      console.log('Ownership check failed');
       return res.status(403).json({
         success: false,
         message: 'ليس لديك صلاحية لحذف هذه الطاولة'
@@ -406,14 +413,17 @@ exports.deleteTable = async (req, res) => {
     });
 
     if (activeSession) {
+      console.log('Cannot delete table with active session');
       return res.status(400).json({
         success: false,
         message: 'لا يمكن حذف طاولة لها جلسة نشطة'
       });
     }
 
-    // Soft delete
-    await table.update({ isActive: false });
+    // Hard delete - permanently remove from database
+    await table.destroy();
+
+    console.log(`Table ${id} deleted successfully`);
 
     res.status(200).json({
       success: true,
