@@ -317,7 +317,7 @@ exports.closeSession = async (req, res) => {
 
 // @desc    Get all sessions with filters
 // @route   GET /api/sessions
-// @access  Admin
+// @access  Admin, Kitchen
 exports.getAllSessions = async (req, res) => {
   try {
     const { status, startDate, endDate, tableId, page = 1, limit = 20 } = req.query;

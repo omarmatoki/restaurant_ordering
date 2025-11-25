@@ -20,7 +20,10 @@
       "Bash(npm install:*)",
       "Bash(npx sequelize-cli:*)",
       "Bash(node update-items-table.js:*)",
-      "Bash(node test-orders-query.js:*)"
+      "Bash(node test-orders-query.js:*)",
+      "Bash(cmd //c taskkill //PID 20752 //F)",
+      "Bash(cmd //c taskkill //PID 20792 //F)",
+      "Bash(cmd //c taskkill //PID 19296 //F)"
     ],
     "deny": [],
     "ask": []

@@ -259,7 +259,7 @@ exports.getPopularItems = async (req, res) => {
 
 // @desc    Get all tables
 // @route   GET /api/admin/tables
-// @access  Admin
+// @access  Admin, Kitchen
 exports.getAllTables = async (req, res) => {
   try {
     const { restaurantId } = req.user;
@@ -608,8 +608,8 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
-    // Soft delete
-    await user.update({ isActive: false });
+    // Hard delete - حذف كامل من قاعدة البيانات
+    await user.destroy();
 
     res.status(200).json({
       success: true,

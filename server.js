@@ -15,9 +15,13 @@ const adminRoutes = require('./routes/adminRoutes');
 const app = express();
 
 // Middleware
+// إعدادات CORS للسماح بالوصول من أي جهاز على الشبكة
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
-  credentials: true
+  origin: true, // السماح لجميع المصادر
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -79,7 +83,7 @@ app.use((err, req, res, next) => {
 });
 
 // Database connection and server start
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT1;
 
 const startServer = async () => {
   try {
@@ -93,17 +97,33 @@ const startServer = async () => {
     console.log('✅ قاعدة البيانات جاهزة');
 
     // Start server
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      const os = require('os');
+      const networkInterfaces = os.networkInterfaces();
+      let localIP = 'localhost';
+
+      // البحث عن عنوان IP المحلي
+      Object.keys(networkInterfaces).forEach((interfaceName) => {
+        networkInterfaces[interfaceName].forEach((interface) => {
+          if (interface.family === 'IPv4' && !interface.internal) {
+            localIP = interface.address;
+          }
+        });
+      });
+
       console.log(`\n🚀 الخادم يعمل على المنفذ ${PORT}`);
       console.log(`📍 البيئة: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🌐 الرابط: http://localhost:${PORT}`);
+      console.log(`\n🌐 روابط الوصول:`);
+      console.log(`   - المحلي: http://localhost:${PORT}`);
+      console.log(`   - الشبكة: http://${localIP}:${PORT}`);
+      console.log(`\n💡 للوصول من أجهزة أخرى على نفس الشبكة، استخدم: http://${localIP}:${PORT}`);
       console.log(`\n📚 API Endpoints:`);
-      console.log(`   - Auth: http://localhost:${PORT}/api/auth`);
-      console.log(`   - Menu: http://localhost:${PORT}/api/menu`);
-      console.log(`   - Sessions: http://localhost:${PORT}/api/sessions`);
-      console.log(`   - Orders: http://localhost:${PORT}/api/orders`);
-      console.log(`   - Kitchen: http://localhost:${PORT}/api/kitchen`);
-      console.log(`   - Admin: http://localhost:${PORT}/api/admin`);
+      console.log(`   - Auth: http://${localIP}:${PORT}/api/auth`);
+      console.log(`   - Menu: http://${localIP}:${PORT}/api/menu`);
+      console.log(`   - Sessions: http://${localIP}:${PORT}/api/sessions`);
+      console.log(`   - Orders: http://${localIP}:${PORT}/api/orders`);
+      console.log(`   - Kitchen: http://${localIP}:${PORT}/api/kitchen`);
+      console.log(`   - Admin: http://${localIP}:${PORT}/api/admin`);
     });
 
     // Handle server errors

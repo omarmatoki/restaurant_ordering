@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "restaurant-ordering-system-2024",
 		"name": "Restaurant Ordering System API",
-		"description": "مجموعة شاملة لجميع endpoints نظام طلبات المطاعم\n\nبيانات تسجيل الدخول:\n- Admin: admin@restaurant.com / admin123\n- Kitchen: kitchen@restaurant.com / admin123",
+		"description": "مجموعة شاملة لجميع endpoints نظام طلبات المطاعم مع QR Code\n\nبيانات تسجيل الدخول الافتراضية:\n- Admin: username: admin / password: admin123\n- Kitchen: username: kitchen / password: admin123\n\nالمنفذ الافتراضي: http://localhost:3000",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -37,7 +37,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin@restaurant.com\",\n  \"password\": \"admin123\"\n}"
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
@@ -69,7 +69,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"kitchen@restaurant.com\",\n  \"password\": \"admin123\"\n}",
+							"raw": "{\n  \"username\": \"kitchen\",\n  \"password\": \"admin123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -201,7 +201,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"oldPassword\": \"admin123\",\n  \"newPassword\": \"newPassword123\"\n}",
+							"raw": "{\n  \"currentPassword\": \"admin123\",\n  \"newPassword\": \"newPassword123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1432,7 +1432,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:5000",
+			"value": "http://localhost:3000",
 			"type": "string"
 		},
 		{

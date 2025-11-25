@@ -29,7 +29,7 @@
 
 | Variable | Initial Value | Current Value |
 |----------|---------------|---------------|
-| `base_url` | `http://localhost:5000` | `http://localhost:5000` |
+| `base_url` | `http://localhost:3000` | `http://localhost:3000` |
 | `admin_token` | (فارغ) | (فارغ) |
 | `kitchen_token` | (فارغ) | (فارغ) |
 | `session_id` | (فارغ) | (فارغ) |
@@ -288,14 +288,14 @@ Restaurant Ordering System API
 
 ## 📝 ملاحظات مهمة
 
-### بيانات تسجيل الدخول (من Seeder):
+### بيانات تسجيل الدخول الافتراضية:
 ```
 Admin:
-  Email: admin@restaurant.com
+  Username: admin
   Password: admin123
 
 Kitchen:
-  Email: kitchen@restaurant.com
+  Username: kitchen
   Password: admin123
 ```
 
@@ -376,7 +376,7 @@ headers: {
 ### المشكلة: `404 Not Found`
 **الحل:** تأكد من:
 - تشغيل السيرفر: `npm start`
-- الـ base_url صحيح: `http://localhost:5000`
+- الـ base_url صحيح: `http://localhost:3000`
 
 ### المشكلة: `Session not found`
 **الحل:** ابدأ جلسة جديدة:
@@ -419,4 +419,4 @@ Run: Create Order
 
 ---
 
-**آخر تحديث:** 2025-11-13
+**آخر تحديث:** 2025-11-22
