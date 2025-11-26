@@ -34,7 +34,9 @@ exports.generateQRCodeImage = async (restaurantId, tableNumber, qrCodeId) => {
   try {
     // Create the URL that the QR code will point to
     // This should be the URL to access the menu for this specific table
-    const menuUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/menu/${qrCodeId}`;
+    const frontendIp = process.env.FRONTEND_IP || 'localhost';
+    const frontendPort = process.env.FRONTEND_PORT || '3000';
+    const menuUrl = `http://${frontendIp}:${frontendPort}/qr/${qrCodeId}`;
 
     // Generate filename
     const filename = `table-${restaurantId}-${tableNumber}-${Date.now()}.png`;
