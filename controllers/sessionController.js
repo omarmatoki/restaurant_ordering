@@ -359,6 +359,11 @@ exports.getAllSessions = async (req, res) => {
           model: User,
           as: 'closedByUser',
           attributes: ['id', 'username']
+        },
+        {
+          model: Order,
+          as: 'orders',
+          attributes: ['id', 'totalAmount']
         }
       ],
       order: [['startTime', 'DESC']],
@@ -366,12 +371,27 @@ exports.getAllSessions = async (req, res) => {
       offset: parseInt(offset)
     });
 
+    // Calculate correct totalAmount for each session
+    const sessionsWithTotal = sessions.map(session => {
+      const sessionData = session.toJSON();
+
+      // Calculate total from all orders
+      const calculatedTotal = session.orders.reduce((sum, order) => {
+        return sum + parseFloat(order.totalAmount || 0);
+      }, 0);
+
+      // Update totalAmount with calculated value
+      sessionData.totalAmount = calculatedTotal.toFixed(2);
+
+      return sessionData;
+    });
+
     res.status(200).json({
       success: true,
       count,
       totalPages: Math.ceil(count / limit),
       currentPage: parseInt(page),
-      data: sessions
+      data: sessionsWithTotal
     });
   } catch (error) {
     console.error('Get all sessions error:', error);
