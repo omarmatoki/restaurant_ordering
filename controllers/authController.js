@@ -253,6 +253,7 @@ exports.login = async (req, res) => {
           username: user.username,
           email: user.email,
           role: user.role,
+          restaurantId: user.restaurantId,
           restaurant: user.restaurant
         }
       }
@@ -283,6 +284,7 @@ exports.getMe = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      user: user,
       data: user
     });
   } catch (error) {

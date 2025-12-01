@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
+const socketIO = require('socket.io');
 const cors = require('cors');
 const { sequelize } = require('./models');
 
@@ -13,6 +15,19 @@ const adminRoutes = require('./routes/adminRoutes');
 
 // Initialize Express app
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.IO with CORS
+const io = socketIO(server, {
+  cors: {
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST']
+  }
+});
+
+// Make io accessible to our router
+app.set('io', io);
 
 // Middleware
 // إعدادات CORS للسماح بالوصول من أي جهاز على الشبكة
@@ -52,6 +67,66 @@ app.get('/', (req, res) => {
       kitchen: '/api/kitchen',
       admin: '/api/admin'
     }
+  });
+});
+
+// Socket.IO connection handling
+const orderController = require('./controllers/orderController');
+
+io.on('connection', (socket) => {
+  console.log('🔌 Socket client connected:', socket.id);
+
+  // Join kitchen room based on restaurantId
+  socket.on('join-kitchen', (restaurantId) => {
+    const room = `kitchen_${restaurantId}`;
+    socket.join(room);
+    console.log(`👨‍🍳 Kitchen joined room: ${room}`);
+  });
+
+  // Handle order creation via socket
+  socket.on('create-order', async (orderData, callback) => {
+    try {
+      console.log('📦 Received order via socket:', orderData);
+
+      // Create a mock request and response object
+      const req = {
+        body: orderData,
+        app: { get: () => io }
+      };
+
+      let responseData = null;
+
+      const res = {
+        status: () => {
+          return res;
+        },
+        json: (data) => {
+          responseData = data;
+        }
+      };
+
+      // Call the controller
+      await orderController.createOrder(req, res);
+
+      // Send response back via callback
+      if (callback && typeof callback === 'function') {
+        callback(responseData);
+      }
+
+      console.log('✅ Order created via socket successfully');
+    } catch (error) {
+      console.error('❌ Error creating order via socket:', error);
+      if (callback && typeof callback === 'function') {
+        callback({
+          success: false,
+          message: error.message || 'فشل إنشاء الطلب'
+        });
+      }
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔌 Socket client disconnected:', socket.id);
   });
 });
 
@@ -97,7 +172,7 @@ const startServer = async () => {
     console.log('✅ قاعدة البيانات جاهزة');
 
     // Start server
-    const server = app.listen(PORT, '0.0.0.0', () => {
+    server.listen(PORT, '0.0.0.0', () => {
       const os = require('os');
       const networkInterfaces = os.networkInterfaces();
       let localIP = 'localhost';
@@ -113,6 +188,7 @@ const startServer = async () => {
 
       console.log(`\n🚀 الخادم يعمل على المنفذ ${PORT}`);
       console.log(`📍 البيئة: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔌 Socket.IO is ready`);
       console.log(`\n🌐 روابط الوصول:`);
       console.log(`   - المحلي: http://localhost:${PORT}`);
       console.log(`   - الشبكة: http://${localIP}:${PORT}`);
@@ -125,23 +201,12 @@ const startServer = async () => {
       console.log(`   - Kitchen: http://${localIP}:${PORT}/api/kitchen`);
       console.log(`   - Admin: http://${localIP}:${PORT}/api/admin`);
     });
-
-    // Handle server errors
-    server.on('error', (error) => {
-      if (error.code === 'EADDRINUSE') {
-        console.error(`\n❌ خطأ: المنفذ ${PORT} مستخدم بالفعل`);
-        console.error(`💡 الحل: أوقف الخادم الآخر أو غيّر المنفذ في ملف .env\n`);
-        process.exit(1);
-      } else {
-        console.error('❌ خطأ في بدء الخادم:', error);
-        process.exit(1);
-      }
-    });
   } catch (error) {
     console.error('❌ خطأ في بدء الخادم:', error);
     process.exit(1);
   }
 };
+
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {

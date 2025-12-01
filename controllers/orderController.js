@@ -119,7 +119,7 @@ exports.createOrder = async (req, res) => {
         {
           model: Session,
           as: 'session',
-          attributes: ['id', 'sessionNumber']
+          attributes: ['id', 'sessionNumber', 'restaurantId']
         },
         {
           model: Table,
@@ -137,6 +137,15 @@ exports.createOrder = async (req, res) => {
         }
       ]
     });
+
+    // Emit socket event to all kitchens of this restaurant
+    const io = req.app.get('io');
+    const restaurantId = fullOrder.session.restaurantId;
+    io.emit('new-order', {
+      order: fullOrder,
+      restaurantId: restaurantId
+    });
+    console.log(`📡 New order emitted to restaurant ${restaurantId}:`, fullOrder.orderNumber);
 
     res.status(201).json({
       success: true,
@@ -418,6 +427,11 @@ exports.updateOrderStatus = async (req, res) => {
     await order.reload({
       include: [
         {
+          model: Session,
+          as: 'session',
+          attributes: ['id', 'sessionNumber', 'restaurantId']
+        },
+        {
           model: Table,
           as: 'table',
           attributes: ['id', 'tableNumber', 'location']
@@ -433,6 +447,15 @@ exports.updateOrderStatus = async (req, res) => {
         }
       ]
     });
+
+    // Emit socket event for status update
+    const io = req.app.get('io');
+    const restaurantId = order.session.restaurantId;
+    io.emit('order-status-updated', {
+      order: order,
+      restaurantId: restaurantId
+    });
+    console.log(`📡 Order status update emitted for restaurant ${restaurantId}:`, order.orderNumber, '->', status);
 
     res.status(200).json({
       success: true,
