@@ -172,7 +172,7 @@ const startServer = async () => {
     console.log('✅ قاعدة البيانات جاهزة');
 
     // Start server
-    server.listen(PORT1, '0.0.0.0', () => {
+    server.listen(PORT, '0.0.0.0', () => {
       const os = require('os');
       const networkInterfaces = os.networkInterfaces();
       let localIP = 'localhost';
