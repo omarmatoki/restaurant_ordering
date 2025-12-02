@@ -35,7 +35,7 @@ services:
    
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      PORT: 3003
+      PORT1: 3003
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
