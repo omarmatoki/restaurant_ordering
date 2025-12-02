@@ -1,5 +1,4 @@
 services:
-  # خدمة قاعدة البيانات MySQL
   db:
     image: mysql:8.0
     container_name: restaurant_db
@@ -10,7 +9,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"   # حماية قاعدة البيانات بحيث لا يتم الوصول لها من الخارج
     volumes:
       - db_data:/var/lib/mysql
       - ./init-db:/docker-entrypoint-initdb.d
@@ -22,13 +21,18 @@ services:
       timeout: 5s
       retries: 5
 
-  # خدمة التطبيق Node.js
   app:
     build: .
     container_name: restaurant_app
     restart: always
+
+    # هنا نعرض منفذ التطبيق للخارج
     ports:
-      - "${PORT:-3000}:3000"
+      - "3000:3000"
+
+    env_file:
+      - .env
+   
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT:-3000}
@@ -43,15 +47,24 @@ services:
       FRONTEND_URL: ${FRONTEND_URL}
       FRONTEND_IP: ${FRONTEND_IP}
       FRONTEND_PORT: ${FRONTEND_PORT}
+
     volumes:
       - ./public/qr-codes:/app/public/qr-codes
       - ./uploads:/app/uploads
+
     depends_on:
       db:
         condition: service_healthy
+
     networks:
       - restaurant_network
-    command: sh -c "npm install && npx sequelize-cli db:migrate && npm start"
+
+    command: >
+      sh -c "
+      npm install &&
+      npx sequelize-cli db:migrate &&
+      npm start
+      "
 
 volumes:
   db_data:
