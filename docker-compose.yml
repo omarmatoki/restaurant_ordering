@@ -51,7 +51,7 @@ services:
         condition: service_healthy
     networks:
       - restaurant_network
-    command: sh -c "npm run migrate && npm start"
+    command: sh -c "npm install && npx sequelize-cli db:migrate && npm start"
 
 volumes:
   db_data:
