@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '../uploads/items');
@@ -8,19 +9,8 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename: timestamp-randomstring-originalname
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    const nameWithoutExt = path.basename(file.originalname, ext);
-    cb(null, `${nameWithoutExt}-${uniqueSuffix}${ext}`);
-  }
-});
+// Configure storage - use memory storage for processing
+const storage = multer.memoryStorage();
 
 // File filter - only allow images
 const fileFilter = (req, file, cb) => {
@@ -44,11 +34,70 @@ const upload = multer({
   }
 });
 
+// Process and convert image to WebP
+const processImage = async (file) => {
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+  const nameWithoutExt = path.basename(file.originalname, path.extname(file.originalname));
+  const filename = `${nameWithoutExt}-${uniqueSuffix}.webp`;
+  const filepath = path.join(uploadsDir, filename);
+
+  await sharp(file.buffer)
+    .webp({ quality: 80 }) // Convert to WebP with 80% quality
+    .toFile(filepath);
+
+  return filename;
+};
+
 // Middleware for single image upload
-exports.uploadSingle = upload.single('image');
+exports.uploadSingle = async (req, res, next) => {
+  upload.single('image')(req, res, async (err) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (req.file) {
+      try {
+        const filename = await processImage(req.file);
+        req.file.filename = filename;
+        req.file.path = path.join(uploadsDir, filename);
+      } catch (error) {
+        return next(new Error('فشل معالجة الصورة: ' + error.message));
+      }
+    }
+
+    next();
+  });
+};
 
 // Middleware for multiple images upload (max 5 images)
-exports.uploadMultiple = upload.array('images', 5);
+exports.uploadMultiple = async (req, res, next) => {
+  upload.array('images', 5)(req, res, async (err) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (req.files && req.files.length > 0) {
+      try {
+        const processedFiles = [];
+
+        for (const file of req.files) {
+          const filename = await processImage(file);
+          processedFiles.push({
+            ...file,
+            filename: filename,
+            path: path.join(uploadsDir, filename)
+          });
+        }
+
+        req.files = processedFiles;
+      } catch (error) {
+        return next(new Error('فشل معالجة الصور: ' + error.message));
+      }
+    }
+
+    next();
+  });
+};
 
 // Error handling middleware
 exports.handleUploadError = (err, req, res, next) => {
