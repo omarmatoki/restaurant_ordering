@@ -236,7 +236,7 @@ const startServer = async () => {
 
     // Sync database - التحقق من الاتصال فقط
     console.log('⏳ التحقق من قاعدة البيانات...');
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
     console.log('✅ قاعدة البيانات جاهزة');
 
     // Start server
