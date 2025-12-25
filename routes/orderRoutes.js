@@ -11,6 +11,9 @@ router.post('/', orderController.createOrder);
 // Get orders for a session
 router.get('/session/:sessionId', orderController.getOrdersBySession);
 
+// Get orders summary for a session (with preparation time)
+router.get('/session/:sessionId/summary', orderController.getOrdersSummaryBySession);
+
 // Get single order details
 router.get('/:orderId', orderController.getOrder);
 

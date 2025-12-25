@@ -83,6 +83,74 @@ io.on('connection', (socket) => {
     console.log(`👨‍🍳 Kitchen joined room: ${room}`);
   });
 
+  // Join customer session room
+  socket.on('join-customer-session', (sessionId) => {
+    const room = `customer_session_${sessionId}`;
+    socket.join(room);
+    console.log(`👤 Customer joined session room: ${room}`);
+  });
+
+  // Leave customer session room
+  socket.on('leave-customer-session', (sessionId) => {
+    const room = `customer_session_${sessionId}`;
+    socket.leave(room);
+    console.log(`👤 Customer left session room: ${room}`);
+  });
+
+  // Get customer orders for a session
+  socket.on('get-customer-orders', async (sessionId, callback) => {
+    try {
+      const { Order, OrderItem, Item } = require('./models');
+
+      const orders = await Order.findAll({
+        where: { sessionId },
+        include: [
+          {
+            model: OrderItem,
+            as: 'orderItems',
+            include: [{
+              model: Item,
+              as: 'item',
+              attributes: ['id', 'name', 'nameAr', 'images', 'price', 'preparationTime']
+            }]
+          }
+        ],
+        order: [['orderTime', 'DESC']]
+      });
+
+      const formattedOrders = orders.map(order => {
+        const orderJSON = order.toJSON();
+        return {
+          ...orderJSON,
+          items: orderJSON.orderItems,
+          preparationTime: orderJSON.preparationTime,
+          startTime: orderJSON.startTime
+        };
+      });
+
+      if (callback && typeof callback === 'function') {
+        callback({
+          success: true,
+          count: formattedOrders.length,
+          data: {
+            orders: formattedOrders
+          }
+        });
+      }
+
+      console.log(`📡 Sent ${formattedOrders.length} orders to customer session ${sessionId}`);
+    } catch (error) {
+      console.error('Get customer orders error:', error);
+      if (callback && typeof callback === 'function') {
+        callback({
+          success: false,
+          message: 'خطأ في جلب الطلبات',
+          error: error.message
+        });
+      }
+    }
+  });
+
   // Handle order creation via socket
   socket.on('create-order', async (orderData, callback) => {
     try {

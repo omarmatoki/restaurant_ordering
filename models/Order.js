@@ -47,6 +47,16 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: true,
       comment: 'General notes for the order'
+    },
+    preparationTime: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: 'Total preparation time in seconds for this order'
+    },
+    startTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: 'Time when order preparation started'
     }
   }, {
     tableName: 'Orders',

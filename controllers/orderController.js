@@ -58,6 +58,7 @@ exports.createOrder = async (req, res) => {
     }, { transaction });
 
     let totalAmount = 0;
+    let maxPreparationTime = 0;
 
     // Create order items
     for (const orderItem of items) {
@@ -95,6 +96,12 @@ exports.createOrder = async (req, res) => {
       const subtotal = unitPrice * quantity;
       totalAmount += subtotal;
 
+      // Get max preparation time (convert minutes to seconds)
+      if (item.preparationTime) {
+        const prepTimeInSeconds = item.preparationTime * 60;
+        maxPreparationTime = Math.max(maxPreparationTime, prepTimeInSeconds);
+      }
+
       // Create order item
       await OrderItem.create({
         orderId: order.id,
@@ -106,9 +113,11 @@ exports.createOrder = async (req, res) => {
       }, { transaction });
     }
 
-    // Update order total
+    // Update order total and preparation time
     await order.update({
-      totalAmount: totalAmount.toFixed(2)
+      totalAmount: totalAmount.toFixed(2),
+      preparationTime: maxPreparationTime,
+      startTime: new Date()
     }, { transaction });
 
     await transaction.commit();
@@ -132,7 +141,7 @@ exports.createOrder = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr', 'images']
+            attributes: ['id', 'name', 'nameAr', 'images', 'preparationTime']
           }]
         }
       ]
@@ -141,11 +150,26 @@ exports.createOrder = async (req, res) => {
     // Emit socket event to all kitchens of this restaurant
     const io = req.app.get('io');
     const restaurantId = fullOrder.session.restaurantId;
+
+    // تحويل orderItems إلى items مع إضافة preparationTime و startTime
+    const orderWithItems = {
+      ...fullOrder.toJSON(),
+      items: fullOrder.orderItems,
+      preparationTime: fullOrder.preparationTime,
+      startTime: fullOrder.startTime
+    };
+
     io.emit('new-order', {
       order: fullOrder,
       restaurantId: restaurantId
     });
     console.log(`📡 New order emitted to restaurant ${restaurantId}:`, fullOrder.orderNumber);
+
+    // إرسال إشعار للزبون الذي قام بالطلب في هذه الجلسة
+    io.to(`customer_session_${sessionId}`).emit('customer-order-created', {
+      order: orderWithItems
+    });
+    console.log(`📡 Order notification sent to customer session ${sessionId}:`, fullOrder.orderNumber);
 
     res.status(201).json({
       success: true,
@@ -196,6 +220,55 @@ exports.getOrdersBySession = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب الطلبات',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get orders summary for a session (with preparation time)
+// @route   GET /api/orders/session/:sessionId/summary
+// @access  Public
+exports.getOrdersSummaryBySession = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    const orders = await Order.findAll({
+      where: { sessionId },
+      include: [
+        {
+          model: OrderItem,
+          as: 'orderItems',
+          include: [{
+            model: Item,
+            as: 'item',
+            attributes: ['id', 'name', 'nameAr', 'images', 'price', 'preparationTime']
+          }]
+        }
+      ],
+      order: [['orderTime', 'DESC']]
+    });
+
+    // تحويل orderItems إلى items لتوحيد الصيغة
+    const formattedOrders = orders.map(order => {
+      const orderJSON = order.toJSON();
+      return {
+        ...orderJSON,
+        items: orderJSON.orderItems
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      count: formattedOrders.length,
+      data: {
+        orders: formattedOrders
+      }
+    });
+  } catch (error) {
+    console.error('Get orders summary by session error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب ملخص الطلبات',
       error: error.message
     });
   }
@@ -442,7 +515,7 @@ exports.updateOrderStatus = async (req, res) => {
           include: [{
             model: Item,
             as: 'item',
-            attributes: ['id', 'name', 'nameAr']
+            attributes: ['id', 'name', 'nameAr', 'preparationTime']
           }]
         }
       ]
@@ -451,11 +524,26 @@ exports.updateOrderStatus = async (req, res) => {
     // Emit socket event for status update
     const io = req.app.get('io');
     const restaurantId = order.session.restaurantId;
+
+    // تحويل orderItems إلى items مع إضافة preparationTime و startTime
+    const orderWithItems = {
+      ...order.toJSON(),
+      items: order.orderItems,
+      preparationTime: order.preparationTime,
+      startTime: order.startTime
+    };
+
     io.emit('order-status-updated', {
       order: order,
       restaurantId: restaurantId
     });
     console.log(`📡 Order status update emitted for restaurant ${restaurantId}:`, order.orderNumber, '->', status);
+
+    // إرسال تحديث الحالة للزبائن في هذه الجلسة
+    io.to(`customer_session_${order.sessionId}`).emit('customer-order-status-updated', {
+      order: orderWithItems
+    });
+    console.log(`📡 Status update sent to customer session ${order.sessionId}:`, order.orderNumber, '->', status);
 
     res.status(200).json({
       success: true,
