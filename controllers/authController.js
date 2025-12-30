@@ -278,14 +278,21 @@ exports.getMe = async (req, res) => {
       include: [{
         model: Restaurant,
         as: 'restaurant',
-        attributes: ['id', 'name', 'address', 'phone']
+        attributes: ['id', 'name', 'address', 'phone', 'logo']
       }]
     });
 
+    const userData = user.toJSON();
+
+    // Add full logo URL if exists
+    if (userData.restaurant && userData.restaurant.logo) {
+      userData.restaurant.logoUrl = `/uploads/logos/${userData.restaurant.logo}`;
+    }
+
     res.status(200).json({
       success: true,
-      user: user,
-      data: user
+      user: userData,
+      data: userData
     });
   } catch (error) {
     console.error('Get me error:', error);

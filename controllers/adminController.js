@@ -1,6 +1,7 @@
 const { Restaurant, User, Table, Session, Order, OrderItem, Item, Category, sequelize } = require('../models');
 const { generateQRCode, generateQRCodeImage } = require('../utils/generateNumbers');
 const { Op } = require('sequelize');
+const { deleteLogo } = require('../middleware/upload');
 
 // ==================== DASHBOARD & REPORTS ====================
 
@@ -620,6 +621,145 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في حذف المستخدم',
+      error: error.message
+    });
+  }
+};
+
+// ==================== RESTAURANT LOGO MANAGEMENT ====================
+
+// @desc    Upload or Update restaurant logo
+// @route   POST/PUT /api/admin/restaurant/logo
+// @access  Admin
+exports.uploadRestaurantLogo = async (req, res) => {
+  try {
+    const { restaurantId } = req.user;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'الرجاء إرفاق ملف الشعار'
+      });
+    }
+
+    // Get restaurant
+    const restaurant = await Restaurant.findByPk(restaurantId);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: 'المطعم غير موجود'
+      });
+    }
+
+    // Delete old logo if exists
+    if (restaurant.logo) {
+      deleteLogo(restaurant.logo);
+    }
+
+    // Update restaurant logo
+    await restaurant.update({
+      logo: req.file.filename
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'تم رفع الشعار بنجاح',
+      data: {
+        logo: req.file.filename,
+        logoUrl: `/uploads/logos/${req.file.filename}`
+      }
+    });
+  } catch (error) {
+    console.error('Upload logo error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في رفع الشعار',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Delete restaurant logo
+// @route   DELETE /api/admin/restaurant/logo
+// @access  Admin
+exports.deleteRestaurantLogo = async (req, res) => {
+  try {
+    const { restaurantId } = req.user;
+
+    // Get restaurant
+    const restaurant = await Restaurant.findByPk(restaurantId);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: 'المطعم غير موجود'
+      });
+    }
+
+    if (!restaurant.logo) {
+      return res.status(400).json({
+        success: false,
+        message: 'لا يوجد شعار لحذفه'
+      });
+    }
+
+    // Delete logo file
+    deleteLogo(restaurant.logo);
+
+    // Update restaurant
+    await restaurant.update({
+      logo: null
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'تم حذف الشعار بنجاح'
+    });
+  } catch (error) {
+    console.error('Delete logo error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في حذف الشعار',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get restaurant info including logo
+// @route   GET /api/admin/restaurant
+// @access  Admin
+exports.getRestaurantInfo = async (req, res) => {
+  try {
+    const { restaurantId } = req.user;
+
+    const restaurant = await Restaurant.findByPk(restaurantId, {
+      attributes: ['id', 'name', 'address', 'phone', 'email', 'logo', 'isActive']
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: 'المطعم غير موجود'
+      });
+    }
+
+    const restaurantData = restaurant.toJSON();
+
+    // Add full logo URL if exists
+    if (restaurantData.logo) {
+      restaurantData.logoUrl = `/uploads/logos/${restaurantData.logo}`;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: restaurantData
+    });
+  } catch (error) {
+    console.error('Get restaurant info error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب معلومات المطعم',
       error: error.message
     });
   }

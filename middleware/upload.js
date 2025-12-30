@@ -9,6 +9,12 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// Create logos directory
+const logosDir = path.join(__dirname, '../uploads/logos');
+if (!fs.existsSync(logosDir)) {
+  fs.mkdirSync(logosDir, { recursive: true });
+}
+
 // Configure storage - use memory storage for processing
 const storage = multer.memoryStorage();
 
@@ -97,6 +103,51 @@ exports.uploadMultiple = async (req, res, next) => {
 
     next();
   });
+};
+
+// Process and convert logo to WebP
+const processLogo = async (file) => {
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+  const filename = `logo-${uniqueSuffix}.webp`;
+  const filepath = path.join(logosDir, filename);
+
+  await sharp(file.buffer)
+    .resize(500, 500, { fit: 'inside', withoutEnlargement: true }) // Max 500x500, maintain aspect ratio
+    .webp({ quality: 85 })
+    .toFile(filepath);
+
+  return filename;
+};
+
+// Middleware for restaurant logo upload
+exports.uploadLogo = async (req, res, next) => {
+  upload.single('logo')(req, res, async (err) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (req.file) {
+      try {
+        const filename = await processLogo(req.file);
+        req.file.filename = filename;
+        req.file.path = path.join(logosDir, filename);
+      } catch (error) {
+        return next(new Error('فشل معالجة الشعار: ' + error.message));
+      }
+    }
+
+    next();
+  });
+};
+
+// Delete logo file
+exports.deleteLogo = (filename) => {
+  if (!filename) return;
+
+  const filepath = path.join(logosDir, filename);
+  if (fs.existsSync(filepath)) {
+    fs.unlinkSync(filepath);
+  }
 };
 
 // Error handling middleware

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { authenticate, authorize } = require('../middleware/auth');
+const { uploadLogo, handleUploadError } = require('../middleware/upload');
 
 // All routes require authentication
 router.use(authenticate);
@@ -27,5 +28,11 @@ router.get('/users', adminController.getAllUsers);
 router.post('/users', adminController.createUser);
 router.put('/users/:id', adminController.updateUser);
 router.delete('/users/:id', adminController.deleteUser);
+
+// Restaurant Management
+router.get('/restaurant', adminController.getRestaurantInfo);
+router.post('/restaurant/logo', uploadLogo, handleUploadError, adminController.uploadRestaurantLogo);
+router.put('/restaurant/logo', uploadLogo, handleUploadError, adminController.uploadRestaurantLogo);
+router.delete('/restaurant/logo', adminController.deleteRestaurantLogo);
 
 module.exports = router;
